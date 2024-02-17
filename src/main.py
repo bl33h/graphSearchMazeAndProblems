@@ -9,7 +9,9 @@ def main():
         # images/mazes/maze4.bmp",
     ]
 
-    solver = MazeSolver()
+    matrix_size = 30
+    family = "BFS"
+    solver = MazeSolver(matrix_size=matrix_size, family=family)
 
     for maze in maze_paths:
         solver.set_maze(maze)

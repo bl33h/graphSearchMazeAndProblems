@@ -6,3 +6,4 @@ class Colors(Enum):
     WALL = 1
     START = 2
     END = 3
+    SOLUTION = 4

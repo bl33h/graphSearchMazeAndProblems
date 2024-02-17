@@ -1,15 +1,21 @@
 from PIL import Image
 from src.maze_solver.colors import Colors
+from src.maze_solver.node import Node
 import numpy as np
 
 
 class MazeSolver:
-    def __init__(self, path: str = None, matrix_size: int = 80):
+    def __init__(self, path: str = None, matrix_size: int = 80, family: str = "BFS"):
         self.path = path
         self.matrix_size = matrix_size
         self.matrix = None
         self.start_position = None
         self.goals = None
+        self.start_node = None
+        self.start_position = None
+        self.goal_nodes = set()
+        self.goal_positions = set()
+        self.family = family
 
     def set_maze(self, maze_path: str):
         """
@@ -19,38 +25,7 @@ class MazeSolver:
         """
         self.path = maze_path
         self.matrix = self._discretize_maze()
-        self.start_position = np.argwhere(self.matrix == Colors.START.value)[0]
-        self.goals = np.argwhere(self.matrix == Colors.END.value)
-
-    def solve(self):
-        """
-        Solve the maze
-        :return:
-        """
-        pass
-
-    def display_maze(self, output_path: str = "images/output/solution.bmp"):
-        """
-        Display the matrix of the maze in a bitmap image
-        :return:
-        """
-        colors = {
-            Colors.PATH.value: (255, 255, 255),  # white for paths
-            Colors.WALL.value: (0, 0, 0),  # black for walls
-            Colors.START.value: (0, 255, 0),  # green for start
-            Colors.END.value: (255, 0, 0)  # red for end
-        }
-
-        # Create a new image with the same dimensions as the matrix
-        image = Image.new("RGB", (self.matrix.shape[1], self.matrix.shape[0]))
-
-        # Set color for each pixel based on the matrix values
-        for y in range(self.matrix.shape[0]):
-            for x in range(self.matrix.shape[1]):
-                image.putpixel((x, y), colors[self.matrix[y, x]])
-
-        # Save the image
-        image.save(output_path)
+        self.graph = self._create_graph()
 
     def _discretize_maze(self):
         """
@@ -128,3 +103,74 @@ class MazeSolver:
             return Colors.END.value
         else:
             return Colors.PATH.value
+
+    def _create_graph(self):
+        """
+        Create a graph from the matrix
+        :return: The graph
+        """
+        graph = {}
+
+        # Add all available nodes to the graph (excluding walls)
+        for y in range(self.matrix_size):
+            for x in range(self.matrix_size):
+                if self.matrix[y][x] != Colors.WALL.value:
+                    if self.matrix[y][x] == Colors.START.value:
+                        node = Node(x, y, is_start=True)
+                        graph[(x, y)] = node
+                        self.start_node = node
+                        self.start_position = (x, y)
+                    elif self.matrix[y][x] == Colors.END.value:
+                        node = Node(x, y, is_goal=True)
+                        graph[(x, y)] = node
+                        self.goal_nodes.add(node)
+                        self.goal_positions.add((x, y))
+                    else:
+                        node = Node(x, y)
+                        graph[(x, y)] = node
+
+        # Add neighbors to each node
+        for node in graph.values():
+            x, y = node.position
+            if y > 0 and self.matrix[y - 1][x] != Colors.WALL.value:
+                node.neighbors.append(graph[(x, y - 1)])
+            if y < self.matrix_size - 1 and self.matrix[y + 1][x] != Colors.WALL.value:
+                node.neighbors.append(graph[(x, y + 1)])
+            if x > 0 and self.matrix[y][x - 1] != Colors.WALL.value:
+                node.neighbors.append(graph[(x - 1, y)])
+            if x < self.matrix_size - 1 and self.matrix[y][x + 1] != Colors.WALL.value:
+                node.neighbors.append(graph[(x + 1, y)])
+
+        return graph
+
+
+    def solve(self):
+        """
+        Solve the maze
+        :return:
+        """
+        pass
+
+    def display_maze(self, output_path: str = "images/output/solution.bmp"):
+        """
+        Display the matrix of the maze in a bitmap image
+        :return:
+        """
+        colors = {
+            Colors.PATH.value: (255, 255, 255),  # white for paths
+            Colors.WALL.value: (0, 0, 0),  # black for walls
+            Colors.START.value: (0, 255, 0),  # green for start
+            Colors.END.value: (255, 0, 0),  # red for end
+            Colors.SOLUTION.value: (0, 0, 255),  # blue for solution
+        }
+
+        # Create a new image with the same dimensions as the matrix
+        image = Image.new("RGB", (self.matrix.shape[1], self.matrix.shape[0]))
+
+        # Set color for each pixel based on the matrix values
+        for y in range(self.matrix.shape[0]):
+            for x in range(self.matrix.shape[1]):
+                image.putpixel((x, y), colors[self.matrix[y, x]])
+
+        # Save the image
+        image.save(output_path)
