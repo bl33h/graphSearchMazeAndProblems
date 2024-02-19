@@ -19,8 +19,12 @@ def main():
     for maze in maze_paths:
         solver.set_maze(maze)
         solver.solve()
-        solver.display_original_maze()
-        solver.display_maze()
+        
+        # display the pixelated maze
+        solver.displayOriginalMaze()
+        
+        # display the maze with the solution path
+        solver.displayMaze()
         
 if __name__ == "__main__":
     main()

@@ -1,9 +1,9 @@
 import math
-from PIL import Image
 import numpy as np
-from maze_solver.colors import Colors
-from maze_solver.node import Node
+from PIL import Image
 from queue import PriorityQueue
+from maze_solver.node import Node
+from maze_solver.colors import Colors
 
 class MazeSolver:
     def __init__(self, path: str = None, matrix_size: int = 80, family: str = "BFS"):
@@ -153,7 +153,14 @@ class MazeSolver:
             return self.solve_dfs()
         else:
             raise ValueError(f"Unsupported family: {self.family}")
-        
+    
+    def solve_bfs(self):
+        pass
+    
+    def solve_dfs(self):
+        pass
+    
+    # A* search algorithm
     def solve_a_star(self):
         """
         Solve the maze using the A* search algorithm.
@@ -170,14 +177,14 @@ class MazeSolver:
         f_score = {node: float("inf") for node in self.graph.values()}
         
         # estimated cost from start to goal
-        f_score[self.start_node] = self._heuristic(self.start_node.position, self.goal_positions)  
+        f_score[self.start_node] = self.heuristics(self.start_node.position, self.goal_positions)  
 
         while not open_set.empty():
             # get the node with the lowest f-score
             current = open_set.get()[2]  
 
             if current in self.goal_nodes:
-                return self._reconstruct_path(came_from, current)
+                return self.reconstructedPath(came_from, current)
 
             for neighbor in current.neighbors:
                 # assuming each step costs 1
@@ -187,7 +194,7 @@ class MazeSolver:
                 if tentative_g_score < g_score[neighbor]:  
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score
-                    f_score[neighbor] = g_score[neighbor] + self._heuristic(neighbor.position, self.goal_positions)
+                    f_score[neighbor] = g_score[neighbor] + self.heuristics(neighbor.position, self.goal_positions)
                     
                     # add the neighbor if it's not in the open set
                     if not any(neighbor == item[2] for item in open_set.queue):  
@@ -195,11 +202,9 @@ class MazeSolver:
                         open_set.put((f_score[neighbor], self.counter, neighbor))
 
         return False
-    
-    def solve_bfs(self):
-        pass
 
-    def _heuristic(self, start, goals):
+    # A* heuristic function
+    def heuristics(self, start, goals):
         """
         Compute the heuristic cost from start to each goal and return the smallest.
         It can switch between Manhattan and Euclidean by changing the return.
@@ -213,7 +218,7 @@ class MazeSolver:
         # heuristic return
         return manhattan_distance  
     
-    def _reconstruct_path(self, came_from, current):
+    def reconstructedPath(self, came_from, current):
         """
         Reconstruct the path from the start node to the goal node and mark it in the matrix.
         """
@@ -230,7 +235,7 @@ class MazeSolver:
 
         return total_path
     
-    def display_original_maze(self, output_path: str = "images/output/maze.bmp"):
+    def displayOriginalMaze(self, output_path: str = "images/output/maze.bmp"):
         """
         Display the pixelated version of the maze without the solution.
         """
@@ -250,7 +255,7 @@ class MazeSolver:
         # save the original maze image before solving
         image.save(output_path)
 
-    def display_maze(self, output_path: str = "images/output/solution.bmp"):
+    def displayMaze(self, output_path: str = "images/output/solution.bmp"):
         """
         Display the matrix of the maze in a bitmap image
         :return:
