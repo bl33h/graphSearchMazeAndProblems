@@ -1,6 +1,5 @@
 from typing import Tuple
 
-
 class Node:
     def __init__(self, x: int, y: int, is_start: bool = False, is_goal: bool = False):
         self.neighbors = []

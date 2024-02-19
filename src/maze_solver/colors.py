@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class Colors(Enum):
     PATH = 0
     WALL = 1
