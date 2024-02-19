@@ -4,6 +4,7 @@ from PIL import Image
 from queue import PriorityQueue
 from maze_solver.node import Node
 from maze_solver.colors import Colors
+from collections import deque
 
 class MazeSolver:
     def __init__(self, path: str = None, matrix_size: int = 80, family: str = "BFS"):
@@ -155,7 +156,25 @@ class MazeSolver:
             raise ValueError(f"Unsupported family: {self.family}")
     
     def solve_bfs(self):
-        pass
+        queue = deque([self.start_node])
+        visited = set()
+        came_from = {}
+
+        while queue:
+            current = queue.popleft()
+            if current in self.goal_nodes:
+                return self.reconstructedPath(came_from, current)
+
+            if current not in visited:
+                visited.add(current)
+
+                # Agrega los nodos vecinos no visitados a la cola
+                for neighbor in current.neighbors:
+                    if neighbor not in visited:
+                        queue.append(neighbor)
+                        came_from[neighbor] = current
+
+        return False
     
     # DFS search algorithm
     def solve_dfs(self):
