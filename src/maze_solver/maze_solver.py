@@ -157,8 +157,27 @@ class MazeSolver:
     def solve_bfs(self):
         pass
     
+    # DFS search algorithm
     def solve_dfs(self):
-        pass
+        stack = [self.start_node]
+        visited = set()
+        came_from = {}
+
+        while stack:
+            current = stack.pop()
+            if current in self.goal_nodes:
+                return self.reconstructedPath(came_from, current)
+        
+            if current not in visited:
+                visited.add(current)
+
+                # Agrega los nodos vecinos no visitados a la pila
+                for neighbor in current.neighbors:
+                    if neighbor not in visited:
+                        stack.append(neighbor)
+                        came_from[neighbor] = current
+
+        return False
     
     # A* search algorithm
     def solve_a_star(self):
@@ -172,7 +191,7 @@ class MazeSolver:
         came_from = {} 
         g_score = {node: float("inf") for node in self.graph.values()}
         
-         # the cost of the start node to itself is 0
+        # the cost of the start node to itself is 0
         g_score[self.start_node] = 0 
         f_score = {node: float("inf") for node in self.graph.values()}
         
